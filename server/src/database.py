@@ -13,11 +13,12 @@ class Product(db.Model):
     images = db.Column(db.LargeBinary)
     created_at = db.Column(db.DateTime, default=datetime.utcnow())
     updated_at = db.Column(db.DateTime, default=datetime.utcnow(), onupdate=datetime.utcnow())
+    state = db.Column(db.String(255), default='ready')
+    task_id = db.Column(db.String(255))
 
-    def __init__(self, name, description, images , price, quantity):
+    def __init__(self, name, description, price, quantity):
         self.name = name
         self.description = description
-        self.images = images
         self.price = price
         self.quantity = quantity
 

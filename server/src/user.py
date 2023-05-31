@@ -2,8 +2,6 @@ from flask import Flask, jsonify, request, send_file
 from database import db, User
 from flask import Blueprint
 import jwt
-import io
-import base64
 
 user = Blueprint("user", __name__)
 secret_key="20200409"

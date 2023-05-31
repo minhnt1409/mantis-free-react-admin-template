@@ -1,6 +1,8 @@
 from flask import Flask, jsonify, request, send_file
 from database import db, Product, User
 from flask import Blueprint
+from celery import chord
+from app1.tasks import add, deleteProduct, save_task_id
 import jwt
 import io
 import base64
@@ -11,7 +13,6 @@ secret_key="20200409"
 @product.route('/products', methods=['GET'])
 def get_products():
     token = request.headers.get('Authorization').split()[1]
-    print(token)
     try:
         decoded_token = jwt.decode(token, secret_key, algorithms=['HS256'])
         id = decoded_token['id']
@@ -19,14 +20,16 @@ def get_products():
             products = Product.query.all()
             result = []
             for product in products:
-                result.append({
-                    'id': product.id,
-                    'name': product.name,
-                    'description': product.description,
-                    'price': product.price,
-                    'quantity': product.quantity,
-                    'soldQuantity': product.soldQuantity
-                })
+                if(product.state == 'ready'):
+                    result.append({
+                        'id': product.id,
+                        'name': product.name,
+                        'description': product.description,
+                        'price': product.price,
+                        'quantity': product.quantity,
+                        'soldQuantity': product.soldQuantity
+                    })
+                print(product.task_id)
             return jsonify(result)
         else:
             raise jwt.InvalidTokenError
@@ -89,7 +92,8 @@ def add_product():
             encoded_image = None
             if image_file != None:
                 encoded_image = base64.b64encode(image_file.read())
-            product = Product(name=name, description=description, images=encoded_image, price=price, quantity=quantity)
+            product = Product(name=name, description=description, price=price, quantity=quantity)
+            product.images = encoded_image
             db.session.add(product)
             db.session.commit()
             return jsonify({'message': 'Product add successfully!'})
@@ -141,8 +145,17 @@ def delete_product(id):
         _id = decoded_token['id']
         if User.query.filter_by(id=_id).first():
             product = Product.query.filter_by(id=id).first()
-            db.session.delete(product)
+            product.state = 'deleting'
             db.session.commit()
+            print(product.state)
+            task = deleteProduct.apply_async(args=[id])
+            print('task_id', task.id)
+            save_task_id.apply_async(args=[id, task.id])
+            # header = deleteProduct.s(id)
+            # callback = save_task_id.s(id,header.id)
+            # res = chord(header,callback)
+            # res.apply_async()
+            # print("id ",header.id)
             return jsonify({'message': 'Product deleted successfully!'})
         else:
             raise jwt.InvalidTokenError
@@ -150,3 +163,11 @@ def delete_product(id):
         return jsonify({"message": "Token has expired"}), 401
     except jwt.InvalidTokenError:
         return jsonify({"message": "Invalid token"}), 401
+        
+@product.route('/test', methods=['GET'])
+def test():
+    print('abc')
+    result = add.apply_async(args=(4, 4),timeout=10)
+    task_result = result.ready()  # Lấy kết quả từ công việc Celery
+    print(task_result)
+    return jsonify(task_result)
