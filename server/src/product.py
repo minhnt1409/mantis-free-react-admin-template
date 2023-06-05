@@ -144,18 +144,10 @@ def delete_product(id):
         decoded_token = jwt.decode(token, secret_key, algorithms=['HS256'])
         _id = decoded_token['id']
         if User.query.filter_by(id=_id).first():
-            product = Product.query.filter_by(id=id).first()
-            product.state = 'deleting'
-            db.session.commit()
-            print(product.state)
-            task = deleteProduct.apply_async(args=[id])
-            print('task_id', task.id)
-            save_task_id.apply_async(args=[id, task.id])
-            # header = deleteProduct.s(id)
-            # callback = save_task_id.s(id,header.id)
-            # res = chord(header,callback)
-            # res.apply_async()
-            # print("id ",header.id)
+            delete_product_task = deleteProduct.si(id)
+            save_task_id_task = save_task_id.si(id, delete_product_task.id)
+            chain = delete_product_task | save_task_id_task
+            chain.delay()
             return jsonify({'message': 'Product deleted successfully!'})
         else:
             raise jwt.InvalidTokenError
