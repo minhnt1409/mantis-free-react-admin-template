@@ -1,10 +1,12 @@
 from flask import Flask, jsonify, request, send_file
 from database import db, User
+from util import verify_token
 from flask import Blueprint
 import jwt
+import bcrypt
 
 user = Blueprint("user", __name__)
-secret_key="20200409"
+JWT_SECRET='20200409'
 
 @user.route('/register', methods=['POST'])
 def register():
@@ -21,8 +23,11 @@ def register():
     if user:
         return jsonify({'error': 'Email already registered'}), 400
     
+    # Băm mật khẩu
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+    
     # Lưu thông tin người dùng vào dictionary
-    user = User(name=name,email=email,password=password,company=company)
+    user = User(name=name,email=email,password=hashed_password,company=company)
     db.session.add(user)
     db.session.commit()
 
@@ -35,36 +40,13 @@ def Login():
     password = request.json.get('password')
     user = User.query.filter_by(email=email).first()
     print('user: ',user)
-    if user and password == user.password:
-        token = jwt.encode({'id':user.id ,'email': email}, secret_key, algorithm='HS256')
+    if user and bcrypt.checkpw(password.encode('utf-8'), user.password):
+        token = jwt.encode({'id':user.id ,'email': email}, JWT_SECRET , algorithm='HS256')
         return jsonify({"message": "Login successful", "token": token}), 200
     else:
         return jsonify({"message": "Invalid email or password"}), 401
     
 @user.route('/logout', methods=['POST'])
+@verify_token
 def Logout():
-    token = request.headers.get('Authorization').split()[1]
-    try:
-        decoded_token = jwt.decode(token, secret_key, algorithms=['HS256'])
-        id = decoded_token['id']
-        if User.query.filter_by(id=id).first():
-            return jsonify({"message": "Logout successful"}), 200
-        else:
-            raise jwt.InvalidTokenError
-    except jwt.ExpiredSignatureError:
-        return jsonify({"message": "Token has expired"}), 401
-    except jwt.InvalidTokenError:
-        return jsonify({"message": "Invalid token"}), 401
-    
-# @user.route('/logout', methods=['POST'])
-# def logout():
-#     # Kiểm tra xem token có hợp lệ hay không
-#     # Nếu đúng, đăng xuất người dùng và trả về một thông báo thành công
-#     # Nếu sai, trả về một thông báo lỗi
-#     token = request.headers.get('Authorization')
-#     print()
-#     if token == 'some_token':
-#         # Đăng xuất người dùng ở đây
-#         return jsonify({'message': 'Logout successful'}), 200
-#     else:
-#         return jsonify({'error': 'Invalid token'}), 401
+    return jsonify({"message": "Logout successful"}), 200

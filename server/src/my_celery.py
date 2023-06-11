@@ -6,3 +6,5 @@ from celery import Celery
 app = Celery('mantis',include=["app1.tasks"])
 
 app.config_from_object('celeryconfig')
+
+# celery -A my_celery worker --loglevel=info
