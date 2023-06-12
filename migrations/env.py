@@ -34,9 +34,11 @@ def get_engine_url():
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
-config.set_main_option('sqlalchemy.url', get_engine_url())
+# import sys
+# sys.path.append('/path/to/')
+from database import db
+target_metadata = db.Model.metadata
+config.set_main_option('sqlalchemy.url', 'sqlite:///database.db')
 target_db = current_app.extensions['migrate'].db
 
 # other values from the config, defined by the needs of env.py,
@@ -86,6 +88,7 @@ def run_migrations_online():
     def process_revision_directives(context, revision, directives):
         if getattr(config.cmd_opts, 'autogenerate', False):
             script = directives[0]
+            logger.info(script.upgrade_ops)
             if script.upgrade_ops.is_empty():
                 directives[:] = []
                 logger.info('No changes in schema detected.')
