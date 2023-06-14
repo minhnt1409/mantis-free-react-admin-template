@@ -88,7 +88,7 @@ def run_migrations_online():
     def process_revision_directives(context, revision, directives):
         if getattr(config.cmd_opts, 'autogenerate', False):
             script = directives[0]
-            logger.info(script.upgrade_ops)
+            logger.info(script)
             if script.upgrade_ops.is_empty():
                 directives[:] = []
                 logger.info('No changes in schema detected.')

@@ -43,13 +43,12 @@ const AuthLogin = () => {
     const handleMouseDownPassword = (event) => {
         event.preventDefault();
     };
-
     return (
         <>
             <Formik
                 initialValues={{
-                    email: 'info@codedthemes.com',
-                    password: '123456',
+                    email: 'user@gmail.com',
+                    password: '1',
                     submit: null
                 }}
                 validationSchema={Yup.object().shape({
@@ -62,7 +61,7 @@ const AuthLogin = () => {
                             const response = await axios.post('http://localhost:5000/login', values);
                             console.log(response);
                             localStorage.setItem('token', response.data.token);
-                            window.location.href = '/free';
+                            window.location.href = '/free/product';
                         } catch (error) {
                             console.error(error);
                             setErrors({ submit: 'Invalid email or password' });

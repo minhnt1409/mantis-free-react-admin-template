@@ -43,18 +43,27 @@ const MainLayout = () => {
         if (open !== drawerOpen) setOpen(drawerOpen);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [drawerOpen]);
-
-    return (
-        <Box sx={{ display: 'flex', width: '100%' }}>
-            <Header open={open} handleDrawerToggle={handleDrawerToggle} />
-            <Drawer open={open} handleDrawerToggle={handleDrawerToggle} />
-            <Box component="main" sx={{ width: '100%', flexGrow: 1, p: { xs: 2, sm: 3 } }}>
-                <Toolbar />
-                <Breadcrumbs navigation={navigation} title titleBottom card={false} divider={false} />
-                <Outlet />
+    const token = localStorage.getItem('token');
+    console.log('token', token);
+    if (token) {
+        return (
+            <Box sx={{ display: 'flex', width: '100%' }}>
+                <Header open={open} handleDrawerToggle={handleDrawerToggle} />
+                <Drawer open={open} handleDrawerToggle={handleDrawerToggle} />
+                <Box component="main" sx={{ width: '100%', flexGrow: 1, p: { xs: 2, sm: 3 } }}>
+                    <Toolbar />
+                    <Breadcrumbs navigation={navigation} title titleBottom card={false} divider={false} />
+                    <Outlet />
+                </Box>
             </Box>
-        </Box>
-    );
+        );
+    } else {
+        try {
+            window.location.href = '/free/login';
+        } catch (error) {
+            console.error(error);
+        }
+    }
 };
 
 export default MainLayout;

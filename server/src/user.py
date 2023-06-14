@@ -30,9 +30,12 @@ def register():
     user = User(name=name,email=email,password=hashed_password,company=company)
     db.session.add(user)
     db.session.commit()
+    
+    #đăng nhập sau khi đăng ký
+    token = jwt.encode({'id':user.id ,'email': email}, JWT_SECRET , algorithm='HS256')
 
     # Trả về một token để sử dụng cho các yêu cầu tiếp theo
-    return jsonify({'message': 'User add successfully!'}), 200
+    return jsonify({'message': 'User add successfully!', "token": token}), 200
 
 @user.route('/login', methods=['POST'])
 def Login():

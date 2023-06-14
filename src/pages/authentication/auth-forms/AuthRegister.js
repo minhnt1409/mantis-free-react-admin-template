@@ -76,7 +76,8 @@ const AuthRegister = () => {
                         try {
                             const response = await axios.post('http://localhost:5000/register', values);
                             console.log(response.data);
-                            window.location.href = '/free/login';
+                            localStorage.setItem('token', response.data.token);
+                            window.location.href = '/free';
                         } catch (error) {
                             console.error(error);
                         }

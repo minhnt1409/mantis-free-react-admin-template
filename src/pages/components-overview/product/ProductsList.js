@@ -12,6 +12,7 @@ import axios from 'axios';
 export default function ProductsList() {
     const [products, setProducts] = useState([]);
     const token = localStorage.getItem('token');
+    console.log(token);
     useEffect(() => {
         axios
             .get('http://localhost:5000/products', {

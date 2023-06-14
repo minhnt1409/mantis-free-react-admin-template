@@ -60,13 +60,13 @@ const Profile = () => {
     const handleLogout = async () => {
         try {
             console.log(token);
-            if (token != 'null') {
+            if (token) {
                 await axios.post('http://localhost:5000/logout', null, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
                 });
-                localStorage.setItem('token', null);
+                localStorage.removeItem('token');
                 window.location.href = '/free/login';
             } else {
                 const confirmDelete = window.confirm('Bạn chưa đăng nhập, bạn muốn chuyển đến trang đăng nhập chứ?');
