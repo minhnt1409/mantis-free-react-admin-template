@@ -24,6 +24,9 @@ const MainLayout = () => {
 
     const { drawerOpen } = useSelector((state) => state.menu);
 
+    const authLogin = useSelector((state) => state.authLogin);
+    const { isLogged } = authLogin;
+
     // drawer toggler
     const [open, setOpen] = useState(drawerOpen);
     const handleDrawerToggle = () => {
@@ -43,9 +46,7 @@ const MainLayout = () => {
         if (open !== drawerOpen) setOpen(drawerOpen);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [drawerOpen]);
-    const token = localStorage.getItem('token');
-    console.log('token', token);
-    if (token) {
+    if (isLogged) {
         return (
             <Box sx={{ display: 'flex', width: '100%' }}>
                 <Header open={open} handleDrawerToggle={handleDrawerToggle} />

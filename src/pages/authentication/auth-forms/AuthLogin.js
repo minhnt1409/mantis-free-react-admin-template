@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
+import { useDispatch, useSelector } from 'react-redux';
 
 // material-ui
 import {
@@ -26,6 +27,7 @@ import { Formik } from 'formik';
 // project import
 import FirebaseSocial from './FirebaseSocial';
 import AnimateButton from 'components/@extended/AnimateButton';
+import { setIsLogged } from 'store/reducers/authLogin';
 
 // assets
 import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
@@ -34,6 +36,11 @@ import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 
 const AuthLogin = () => {
     const [checked, setChecked] = React.useState(false);
+    const dispatch = useDispatch();
+    const authLogin = useSelector((state) => state.authLogin);
+    const isLogged = authLogin.isLogged;
+
+    console.log(isLogged);
 
     const [showPassword, setShowPassword] = React.useState(false);
     const handleClickShowPassword = () => {
@@ -61,6 +68,8 @@ const AuthLogin = () => {
                             const response = await axios.post('http://localhost:5000/login', values);
                             console.log(response);
                             localStorage.setItem('token', response.data.token);
+                            dispatch(setIsLogged({ isLogged: true }));
+                            console.log(isLogged);
                             window.location.href = '/free/product';
                         } catch (error) {
                             console.error(error);

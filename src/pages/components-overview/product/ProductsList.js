@@ -1,30 +1,30 @@
 // import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 
 // material-ui
 import { CardMedia, TableContainer, Paper, Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material';
 // import ProductInfo from 'components/cards/statistics/ProductInfo';
 import axios from 'axios';
 // import image from '../components-overview/product/image.jpg';
+import { fetchProducts } from 'store/reducers/product';
 // ==============================|| ORDER TABLE ||============================== //
 
 export default function ProductsList() {
-    const [products, setProducts] = useState([]);
     const token = localStorage.getItem('token');
-    console.log(token);
+    const dispatch = useDispatch();
+    const [loading, setLoading] = useState(true);
     useEffect(() => {
-        axios
-            .get('http://localhost:5000/products', {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            })
-            .then((response) => {
-                console.log(response.data);
-                setProducts(response.data);
+        dispatch(fetchProducts())
+            .then(() => setLoading(false))
+            .catch((error) => {
+                console.error('Error fetching products:', error);
+                setLoading(false);
             });
     }, []);
+    const products = useSelector((state) => state.product);
+    console.log('products:', products);
     return (
         <TableContainer component={Paper}>
             <Table>

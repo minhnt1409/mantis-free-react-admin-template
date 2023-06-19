@@ -1,5 +1,4 @@
 // project import
-import Loadable from 'components/Loadable';
 import MainLayout from 'layout/MainLayout';
 
 // render - Product
